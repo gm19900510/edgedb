@@ -1344,13 +1344,13 @@ class EdgeQLSourceGenerator(codegen.SourceGenerator):
                 self.new_lines = 1
 
             if node.code.from_function:
-                from_clause = f' FROM {node.code.language} FUNCTION '
+                from_clause = f' USING {node.code.language} FUNCTION '
                 if self.sdlmode:
                     from_clause = from_clause.lower()
                 self.write(from_clause)
                 self.write(f'{node.code.from_function!r}')
             else:
-                from_clause = f' FROM {node.code.language} '
+                from_clause = f' USING {node.code.language} '
                 if self.sdlmode:
                     from_clause = from_clause.lower()
                 self.write(from_clause)

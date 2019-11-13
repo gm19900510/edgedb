@@ -26,7 +26,7 @@ CREATE FUNCTION
 std::len(str: std::str) -> std::int64
 {
     SET volatility := 'IMMUTABLE';
-    FROM SQL $$
+    USING SQL $$
     SELECT char_length("str")::bigint
     $$;
 };
@@ -36,7 +36,7 @@ CREATE FUNCTION
 std::len(bytes: std::bytes) -> std::int64
 {
     SET volatility := 'IMMUTABLE';
-    FROM SQL $$
+    USING SQL $$
     SELECT length("bytes")::bigint
     $$;
 };
@@ -46,7 +46,7 @@ CREATE FUNCTION
 std::len(array: array<anytype>) -> std::int64
 {
     SET volatility := 'IMMUTABLE';
-    FROM SQL $$
+    USING SQL $$
     SELECT cardinality("array")::bigint
     $$;
 };
@@ -60,7 +60,7 @@ std::sum(s: SET OF std::decimal) -> std::decimal
 {
     SET volatility := 'IMMUTABLE';
     SET initial_value := 0;
-    FROM SQL FUNCTION 'sum';
+    USING SQL FUNCTION 'sum';
 };
 
 
@@ -70,7 +70,7 @@ std::sum(s: SET OF std::int32) -> std::int64
     SET volatility := 'IMMUTABLE';
     SET initial_value := 0;
     SET force_return_cast := true;
-    FROM SQL FUNCTION 'sum';
+    USING SQL FUNCTION 'sum';
 };
 
 
@@ -80,7 +80,7 @@ std::sum(s: SET OF std::int64) -> std::int64
     SET volatility := 'IMMUTABLE';
     SET initial_value := 0;
     SET force_return_cast := true;
-    FROM SQL FUNCTION 'sum';
+    USING SQL FUNCTION 'sum';
 };
 
 
@@ -89,7 +89,7 @@ std::sum(s: SET OF std::float32) -> std::float32
 {
     SET volatility := 'IMMUTABLE';
     SET initial_value := 0;
-    FROM SQL FUNCTION 'sum';
+    USING SQL FUNCTION 'sum';
 };
 
 
@@ -98,7 +98,7 @@ std::sum(s: SET OF std::float64) -> std::float64
 {
     SET volatility := 'IMMUTABLE';
     SET initial_value := 0;
-    FROM SQL FUNCTION 'sum';
+    USING SQL FUNCTION 'sum';
 };
 
 
@@ -110,7 +110,7 @@ std::count(s: SET OF anytype) -> std::int64
 {
     SET volatility := 'IMMUTABLE';
     SET initial_value := 0;
-    FROM SQL FUNCTION 'count';
+    USING SQL FUNCTION 'count';
 };
 
 
@@ -121,7 +121,7 @@ CREATE FUNCTION
 std::random() -> std::float64
 {
     SET volatility := 'VOLATILE';
-    FROM SQL FUNCTION 'random';
+    USING SQL FUNCTION 'random';
 };
 
 
@@ -132,7 +132,7 @@ CREATE FUNCTION
 std::min(vals: SET OF anytype) -> OPTIONAL anytype
 {
     SET volatility := 'IMMUTABLE';
-    FROM SQL FUNCTION 'min';
+    USING SQL FUNCTION 'min';
 };
 
 
@@ -143,7 +143,7 @@ CREATE FUNCTION
 std::max(vals: SET OF anytype) -> OPTIONAL anytype
 {
     SET volatility := 'IMMUTABLE';
-    FROM SQL FUNCTION 'max';
+    USING SQL FUNCTION 'max';
 };
 
 
@@ -155,7 +155,7 @@ std::all(vals: SET OF std::bool) -> std::bool
 {
     SET volatility := 'IMMUTABLE';
     SET initial_value := True;
-    FROM SQL FUNCTION 'bool_and';
+    USING SQL FUNCTION 'bool_and';
 };
 
 
@@ -167,7 +167,7 @@ std::any(vals: SET OF std::bool) -> std::bool
 {
     SET volatility := 'IMMUTABLE';
     SET initial_value := False;
-    FROM SQL FUNCTION 'bool_or';
+    USING SQL FUNCTION 'bool_or';
 };
 
 
@@ -180,7 +180,7 @@ std::enumerate(
 ) -> SET OF tuple<std::int64, anytype>
 {
     SET volatility := 'IMMUTABLE';
-    FROM SQL EXPRESSION;
+    USING SQL EXPRESSION;
 };
 
 
@@ -191,7 +191,7 @@ CREATE FUNCTION
 std::round(val: std::int64) -> std::float64
 {
     SET volatility := 'IMMUTABLE';
-    FROM SQL $$
+    USING SQL $$
     SELECT round("val")
     $$;
 };
@@ -201,7 +201,7 @@ CREATE FUNCTION
 std::round(val: std::float64) -> std::float64
 {
     SET volatility := 'IMMUTABLE';
-    FROM SQL $$
+    USING SQL $$
     SELECT round("val")
     $$;
 };
@@ -211,7 +211,7 @@ CREATE FUNCTION
 std::round(val: std::decimal) -> std::decimal
 {
     SET volatility := 'IMMUTABLE';
-    FROM SQL $$
+    USING SQL $$
     SELECT round("val")
     $$;
 };
@@ -221,7 +221,7 @@ CREATE FUNCTION
 std::round(val: std::decimal, d: std::int64) -> std::decimal
 {
     SET volatility := 'IMMUTABLE';
-    FROM SQL $$
+    USING SQL $$
     SELECT round("val", "d"::int4)
     $$;
 };
@@ -234,7 +234,7 @@ CREATE FUNCTION
 std::contains(haystack: std::str, needle: std::str) -> std::bool
 {
     SET volatility := 'IMMUTABLE';
-    FROM SQL $$
+    USING SQL $$
     SELECT strpos("haystack", "needle") != 0
     $$;
 };
@@ -244,7 +244,7 @@ CREATE FUNCTION
 std::contains(haystack: std::bytes, needle: std::bytes) -> std::bool
 {
     SET volatility := 'IMMUTABLE';
-    FROM SQL $$
+    USING SQL $$
     SELECT position("needle" in "haystack") != 0
     $$;
 };
@@ -254,7 +254,7 @@ CREATE FUNCTION
 std::contains(haystack: array<anytype>, needle: anytype) -> std::bool
 {
     SET volatility := 'IMMUTABLE';
-    FROM SQL $$
+    USING SQL $$
     SELECT
         CASE
             WHEN "needle" IS NULL THEN NULL
@@ -271,7 +271,7 @@ CREATE FUNCTION
 std::find(haystack: std::str, needle: std::str) -> std::int64
 {
     SET volatility := 'IMMUTABLE';
-    FROM SQL $$
+    USING SQL $$
     SELECT (strpos("haystack", "needle") - 1)::int8
     $$;
 };
@@ -281,7 +281,7 @@ CREATE FUNCTION
 std::find(haystack: std::bytes, needle: std::bytes) -> std::int64
 {
     SET volatility := 'IMMUTABLE';
-    FROM SQL $$
+    USING SQL $$
     SELECT (position("needle" in "haystack") - 1)::int8
     $$;
 };
@@ -292,7 +292,7 @@ std::find(haystack: array<anytype>, needle: anytype,
           from_pos: std::int64=0) -> std::int64
 {
     SET volatility := 'IMMUTABLE';
-    FROM SQL $$
+    USING SQL $$
     SELECT COALESCE(
         array_position("haystack", "needle", ("from_pos"::int4 + 1)::int4) - 1,
         -1)::int8
@@ -306,7 +306,7 @@ std::find(haystack: array<anytype>, needle: anytype,
 CREATE INFIX OPERATOR
 std::`=` (l: anytuple, r: anytuple) -> std::bool {
     SET volatility := 'IMMUTABLE';
-    FROM SQL OPERATOR '=';
+    USING SQL OPERATOR '=';
     SET recursive := true;
 };
 
@@ -314,7 +314,7 @@ std::`=` (l: anytuple, r: anytuple) -> std::bool {
 CREATE INFIX OPERATOR
 std::`?=` (l: OPTIONAL anytuple, r: OPTIONAL anytuple) -> std::bool {
     SET volatility := 'IMMUTABLE';
-    FROM SQL EXPRESSION;
+    USING SQL EXPRESSION;
     SET recursive := true;
 };
 
@@ -322,7 +322,7 @@ std::`?=` (l: OPTIONAL anytuple, r: OPTIONAL anytuple) -> std::bool {
 CREATE INFIX OPERATOR
 std::`!=` (l: anytuple, r: anytuple) -> std::bool {
     SET volatility := 'IMMUTABLE';
-    FROM SQL OPERATOR '<>';
+    USING SQL OPERATOR '<>';
     SET recursive := true;
 };
 
@@ -330,7 +330,7 @@ std::`!=` (l: anytuple, r: anytuple) -> std::bool {
 CREATE INFIX OPERATOR
 std::`?!=` (l: OPTIONAL anytuple, r: OPTIONAL anytuple) -> std::bool {
     SET volatility := 'IMMUTABLE';
-    FROM SQL EXPRESSION;
+    USING SQL EXPRESSION;
     SET recursive := true;
 };
 
@@ -338,7 +338,7 @@ std::`?!=` (l: OPTIONAL anytuple, r: OPTIONAL anytuple) -> std::bool {
 CREATE INFIX OPERATOR
 std::`>=` (l: anytuple, r: anytuple) -> std::bool {
     SET volatility := 'IMMUTABLE';
-    FROM SQL OPERATOR '>=';
+    USING SQL OPERATOR '>=';
     SET recursive := true;
 };
 
@@ -346,7 +346,7 @@ std::`>=` (l: anytuple, r: anytuple) -> std::bool {
 CREATE INFIX OPERATOR
 std::`>` (l: anytuple, r: anytuple) -> std::bool {
     SET volatility := 'IMMUTABLE';
-    FROM SQL OPERATOR '>';
+    USING SQL OPERATOR '>';
     SET recursive := true;
 };
 
@@ -354,7 +354,7 @@ std::`>` (l: anytuple, r: anytuple) -> std::bool {
 CREATE INFIX OPERATOR
 std::`<=` (l: anytuple, r: anytuple) -> std::bool {
     SET volatility := 'IMMUTABLE';
-    FROM SQL OPERATOR '<=';
+    USING SQL OPERATOR '<=';
     SET recursive := true;
 };
 
@@ -362,6 +362,6 @@ std::`<=` (l: anytuple, r: anytuple) -> std::bool {
 CREATE INFIX OPERATOR
 std::`<` (l: anytuple, r: anytuple) -> std::bool {
     SET volatility := 'IMMUTABLE';
-    FROM SQL OPERATOR '<';
+    USING SQL OPERATOR '<';
     SET recursive := true;
 };
