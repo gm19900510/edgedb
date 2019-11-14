@@ -1162,14 +1162,14 @@ abstract property foo {
         """
         view FooBaz {
             annotation description := 'Special Foo';
-            expr := (SELECT Foo FILTER Foo.bar = 'baz');
+            using (SELECT Foo FILTER Foo.bar = 'baz');
         };
         """
 
     def test_eschema_syntax_view_02(self):
         """
         view FooBaz {
-            expr := (
+            using (
                 SELECT Foo
                 FILTER Foo.bar = 'baz'
             );

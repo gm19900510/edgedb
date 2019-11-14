@@ -879,7 +879,7 @@ class ObjectTypeDeclarationShort(Nonterm):
 
 sdl_commands_block(
     'CreateView',
-    SetField,
+    commondl.ViewCode,
     SetAnnotation,
     opt=False
 )
@@ -904,9 +904,8 @@ class ViewDeclarationShort(Nonterm):
         self.val = qlast.CreateView(
             name=kids[1].val,
             commands=[
-                qlast.SetField(
-                    name=qlast.ObjectRef(name='expr'),
-                    value=kids[3].val,
+                qlast.ViewCode(
+                    expr=kids[3].val,
                 )
             ]
         )

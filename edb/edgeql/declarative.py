@@ -324,11 +324,17 @@ def trace_ConcretePointer(
 def trace_View(
     node: qlast.CreateView, *, ctx: DepTraceContext
 ):
+    from edb.edgeql import parser as qlparser
     hard_dep_exprs = []
 
     for cmd in node.commands:
-        if isinstance(cmd, qlast.SetField) and cmd.name.name == "expr":
-            hard_dep_exprs.append(cmd.value)
+        if isinstance(cmd, qlast.ViewCode):
+            if cmd.expr:
+                expr = cmd.expr
+            else:
+                expr = qlparser.parse(cmd.code)
+
+            hard_dep_exprs.append(expr)
             break
 
     _register_item(node, hard_dep_exprs=hard_dep_exprs, ctx=ctx)

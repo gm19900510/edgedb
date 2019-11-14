@@ -3539,11 +3539,11 @@ aa';
     def test_edgeql_syntax_ddl_view_02(self):
         """
         CREATE VIEW Foo {
-            SET expr := (SELECT User);
+            USING (SELECT User);
         };
 
         ALTER VIEW Foo
-            SET expr := (SELECT Person);
+            USING (SELECT Person);
 
         DROP VIEW Foo;
 
@@ -3552,9 +3552,16 @@ aa';
         CREATE VIEW Foo := (SELECT User);
 
         ALTER VIEW Foo
-            SET expr := (SELECT Person);
+            USING (SELECT Person);
 
         DROP VIEW Foo;
+        """
+
+    def test_edgeql_syntax_ddl_view_03(self):
+        """
+        CREATE VIEW Foo {
+            USING EdgeQL $$ SELECT User $$;
+        };
         """
 
     def test_edgeql_syntax_ddl_index_01(self):

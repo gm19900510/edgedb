@@ -953,6 +953,12 @@ class _Optional(Expr):
     expr: Expr
 
 
+class ViewCode(Clause, DDL):
+    language: Language
+    code: str
+    expr: Expr
+
+
 #
 # Config
 #

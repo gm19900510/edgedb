@@ -27,7 +27,7 @@ import uuid
 
 from edb import errors
 
-from edb.common import checked
+from edb.common import checked, struct
 
 from edb.edgeql import ast as qlast
 
@@ -1582,21 +1582,74 @@ def ensure_schema_union_type(schema, union_type_ref, parent_cmd, *,
     return schema, union_type
 
 
+class UsingClause(sd.AlterObjectProperty):
+    astnode = qlast.ViewCode
+
+    property = struct.Field(str, default='expr')
+    # new_value = struct.Field(object, None)
+    # source = struct.Field(str, None)
+
+    @classmethod
+    def _cmd_tree_from_ast(cls, schema, astnode, context):
+        from edb.edgeql import parser as qlparser
+
+        parent_ctx = context.current()
+        parent_op = parent_ctx.op
+        field = parent_op.get_schema_metaclass().get_field('expr')
+
+        assert field is not None
+
+        if astnode.expr:
+            new_value = s_expr.Expression.from_ast(
+                astnode.expr,
+                schema,
+                context.modaliases,
+            )
+        else:
+            # parse the code to properly set up the context
+            new_value = s_expr.Expression.from_ast(
+                qlparser.parse(astnode.code),
+                schema,
+                context.modaliases,
+                origtext=astnode.code
+            )
+
+        from edb.common.markup import dump
+        dump(cls, marker='types.py:1617')
+
+        return cls(new_value=new_value,
+                   source_context=astnode.context)
+
+    def _get_ast(self, schema, context):
+        value = self.new_value.qlast
+        op = qlast.ViewCode(expr=value)
+        return op
+
+    # def __repr__(self):
+    #     return '<%s.%s "%s":"%s"->"%s">' % (
+    #         self.__class__.__module__, self.__class__.__name__,
+    #         self.property, self.old_value, self.new_value)
+
+
 class TypeCommand(sd.ObjectCommand):
     @classmethod
     def _maybe_get_view_expr(
         cls, astnode: qlast.ObjectDDL
     ) -> Optional[qlast.Expr]:
-        for subcmd in astnode.commands:
-            if (isinstance(subcmd, qlast.SetField) and
-                    subcmd.name.name == 'expr'):
-                return subcmd.value
+        from edb.edgeql import parser as qlparser
 
-        return None
+        for subcmd in astnode.commands:
+            if isinstance(subcmd, qlast.ViewCode):
+                if subcmd.expr:
+                    return subcmd.expr, subcmd
+                else:
+                    return qlparser.parse(subcmd.code), subcmd
+
+        return None, None
 
     @classmethod
     def _get_view_expr(cls, astnode: qlast.CreateView) -> qlast.Expr:
-        expr = cls._maybe_get_view_expr(astnode)
+        expr, _ = cls._maybe_get_view_expr(astnode)
         if expr is None:
             raise errors.InvalidViewDefinitionError(
                 f'missing required view expression', context=astnode.context)
@@ -1634,9 +1687,12 @@ class TypeCommand(sd.ObjectCommand):
     ) -> sd.Command:
         from . import ordering as s_ordering
 
-        view_expr = cls._maybe_get_view_expr(astnode)
+        view_expr, view_code_node = cls._maybe_get_view_expr(astnode)
         if view_expr is None:
             return cmd
+
+        from edb.common.markup import dump
+        dump(view_expr, marker='types.py:1695')
 
         classname = cmd.classname
         if not s_name.Name.is_qualified(classname):
@@ -1657,6 +1713,9 @@ class TypeCommand(sd.ObjectCommand):
         new_schema = ir.schema
 
         expr = s_expr.Expression.from_ir(expr, ir, schema=schema)
+
+        from edb.common.markup import dump
+        dump(expr.is_compiled(), marker='types.py:1718')
 
         coll_view_types: List[Collection] = []
         prev_coll_view_types: List[Collection] = []
@@ -1721,7 +1780,20 @@ class TypeCommand(sd.ObjectCommand):
                 'view delta does not contain the expected '
                 'view Create/Alter command')
 
-        real_cmd.set_attribute_value('expr', expr)
+        # can't call set_attribute_value because it will use
+        # AlterObjectProperty instead of UsingClause
+        real_cmd.add(
+            UsingClause(
+                new_value=expr,
+                source_context=astnode.context
+            )
+        )
+        # real_cmd.set_attribute_value('expr', expr)
+
+        from edb.common.markup import dump
+        dump(list(real_cmd.ops), marker='types.py:1793')
+        dump(type(derived_delta), marker='types.py:1794')
+        dump(list(derived_delta.get_subcommands()), marker='types.py:1795')
 
         result = sd.CommandGroup()
         result.update(derived_delta.get_subcommands())

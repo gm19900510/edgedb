@@ -1369,7 +1369,7 @@ class DropObjectTypeStmt(Nonterm):
 
 commands_block(
     'CreateView',
-    SetFieldStmt,
+    commondl.ViewCode,
     SetAnnotationValueStmt,
     opt=False
 )
@@ -1383,9 +1383,8 @@ class CreateViewStmt(Nonterm):
         self.val = qlast.CreateView(
             name=kids[2].val,
             commands=[
-                qlast.SetField(
-                    name=qlast.ObjectRef(name='expr'),
-                    value=kids[4].val,
+                qlast.ViewCode(
+                    expr=kids[4].val,
                 )
             ]
         )
@@ -1408,7 +1407,7 @@ class CreateViewStmt(Nonterm):
 commands_block(
     'AlterView',
     RenameStmt,
-    SetFieldStmt,
+    commondl.ViewCode,
     SetAnnotationValueStmt,
     DropAnnotationValueStmt,
     opt=False

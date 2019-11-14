@@ -77,15 +77,18 @@ class Expression(struct.MixedStruct, s_abc.ObjectContainer):
             return compcoef
 
     @classmethod
-    def from_ast(cls, qltree, schema, modaliases, *, as_fragment=False):
-        orig_text = qlcodegen.generate_source(qltree, pretty=False)
+    def from_ast(cls, qltree, schema, modaliases, *,
+                 as_fragment=False, origtext=None):
+        # origtext can be passed explicitly or automatically generated
+        if origtext is None:
+            origtext = qlcodegen.generate_source(qltree, pretty=False)
         if not as_fragment:
             qltree = imprint_expr_context(qltree, modaliases)
         norm_text = qlcodegen.generate_source(qltree, pretty=False)
 
         return cls(
             text=norm_text,
-            origtext=orig_text,
+            origtext=origtext,
             _qlast=qltree,
         )
 

@@ -439,8 +439,15 @@ def _text_from_delta(
     )
     text = []
     for command in delta.get_subcommands():
+
+        from edb.common.markup import dump
+
         with context(sd.DeltaRootContext(schema=schema, op=delta)):
             delta_ast = command.get_ast(schema, context)
+
+            dump(type(command), marker='ddl.py:448')
+            dump(delta_ast, marker='ddl.py:449')
+
             if delta_ast:
                 ql_classes = [
                     scls.get_ql_class() for scls in limit_ref_classes

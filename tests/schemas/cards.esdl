@@ -67,10 +67,14 @@ view WaterOrEarthCard := (
 
 
 view EarthOrFireCard {
-    expr := (SELECT Card FILTER .element = 'Fire' OR .element = 'Earth')
+    using (SELECT Card FILTER .element = 'Fire' OR .element = 'Earth')
 };
 
 
-view SpecialCardView := SpecialCard {
-    el_cost := (.element, .cost)
+view SpecialCardView {
+    using edgeql $$
+        SpecialCard {
+            el_cost := (.element, .cost)
+        }
+    $$;
 };

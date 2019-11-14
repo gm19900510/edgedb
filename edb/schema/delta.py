@@ -760,6 +760,10 @@ class ObjectCommand(Command, metaclass=ObjectCommandMeta):
 
         mcls = self.get_schema_metaclass()
 
+        for op in self.ops:
+            from edb.common.markup import dump
+            dump(type(op), marker='delta.py:765')
+
         for op in self.get_subcommands(type=AlterObjectProperty):
             if op.source != 'inheritance' or context.descriptive_mode:
                 self._apply_field_ast(schema, context, node, op)
@@ -772,8 +776,16 @@ class ObjectCommand(Command, metaclass=ObjectCommandMeta):
             self._append_subcmd_ast(schema, node, op, context)
 
     def _apply_field_ast(self, schema, context, node, op):
+
+        from edb.common.markup import dump
+        dump(type(op), marker='delta.py:780')
+
         if op.property != 'name':
             subnode = op._get_ast(schema, context)
+
+            # from edb.common.markup import dump
+            dump(subnode, marker='delta.py:782')
+
             if subnode is not None:
                 node.commands.append(subnode)
 

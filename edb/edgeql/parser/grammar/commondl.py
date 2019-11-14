@@ -367,6 +367,22 @@ class ProcessFunctionBlockMixin:
         return props
 
 
+class ViewCode(Nonterm):
+    def reduce_USING_Identifier_BaseStringConstant(self, *kids):
+        lang = _parse_language(kids[1])
+        if lang != qlast.Language.EdgeQL:
+            raise EdgeQLSyntaxError(
+                f'{lang} language is not supported in USING clause of '
+                f'computables',
+                context=kids[1].context) from None
+
+        code = kids[2].val.value
+        self.val = qlast.ViewCode(language=lang, code=code)
+
+    def reduce_USING_Expr(self, *kids):
+        self.val = qlast.ViewCode(expr=kids[1].val)
+
+
 #
 # CREATE TYPE ... { CREATE LINK ... { ON TARGET DELETE ...
 #

@@ -299,7 +299,12 @@ class CreateObjectType(ObjectTypeCommand, inheriting.CreateInheritingObject):
             # and should obviously not appear as a top level definition.
             return None
         else:
-            return super()._get_ast(schema, context)
+            x = super()._get_ast(schema, context)
+
+            from edb.common.markup import dump
+            dump(x, marker='objtypes.py:304')
+
+            return x
 
     def _get_ast_node(self, schema, context):
         if self.get_attribute_value('view_type'):

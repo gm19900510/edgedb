@@ -89,7 +89,7 @@ class EdgeQLSourceGenerator(codegen.SourceGenerator):
             node.parent is not None and (
                 not isinstance(node.parent, qlast.Base)
                 or not isinstance(node.parent, qlast.DDL)
-                or isinstance(node.parent, qlast.SetField)
+                or isinstance(node.parent, (qlast.SetField, qlast.ViewCode))
             )
         )
 
@@ -948,14 +948,14 @@ class EdgeQLSourceGenerator(codegen.SourceGenerator):
 
     def visit_CreateView(self, node):
         if (len(node.commands) == 1
-                and isinstance(node.commands[0], qlast.SetField)
-                and node.commands[0].name.name == 'expr'):
+                and isinstance(node.commands[0], qlast.ViewCode)
+                and node.commands[0].expr is not None):
 
             self._visit_CreateObject(node, 'VIEW', render_commands=False)
             self.write(' := ')
             self.new_lines = 1
             self.indentation += 1
-            self.visit(node.commands[0].value)
+            self.visit(node.commands[0].expr)
             self.indentation -= 1
             self.new_lines = 1
         else:
@@ -966,6 +966,16 @@ class EdgeQLSourceGenerator(codegen.SourceGenerator):
 
     def visit_DropView(self, node):
         self._visit_DropObject(node, 'VIEW')
+
+    def visit_ViewCode(self, node):
+        self._write_keywords('USING ')
+
+        if node.language:
+            self._write_keywords(node.language)
+            self.write(' ', edgeql_quote.dollar_quote_literal(
+                node.code))
+        else:
+            self.visit(node.expr)
 
     def visit_SetField(self, node):
         if not self.sdlmode:
